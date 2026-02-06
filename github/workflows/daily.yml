@@ -1,0 +1,26 @@
+name: Daily-Business
+on:
+  schedule:
+    - cron: '0 */6 * * *' # Runs every 6 hours
+  workflow_dispatch:      # Allows manual click to run
+
+permissions:
+  contents: write
+
+jobs:
+  run_business:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with: { python-version: '3.9' }
+      - run: pip install -r requirements.txt
+      - run: python hunter.py
+      - run: python broadcaster.py
+        env:
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+          CHANNEL_ID: ${{ secrets.CHANNEL_ID }}
+      - uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "Updated Database"
+          file_pattern: "inventory.json"
